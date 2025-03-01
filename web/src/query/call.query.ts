@@ -75,3 +75,26 @@ export const useCreateCall = () => {
     ...mutation,
   };
 };
+
+export const useGenerateScript = () => {
+  const mutation = useMutation({
+    mutationFn: async (callId: string) => {
+      const response = await fetch(`/api/calls/${callId}/script`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate script');
+      }
+
+      return response.json() as Promise<{
+        persona: string;
+      }>;
+    },
+  });
+
+  return {
+    generateScript: mutation.mutateAsync,
+    ...mutation,
+  };
+};

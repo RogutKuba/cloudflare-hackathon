@@ -31,7 +31,7 @@ export default function Home() {
     <div className='bg-background text-foreground min-h-screen p-6'>
       <header className='mb-6 flex justify-between items-center'>
         <div>
-          <h1 className='text-3xl font-bold'>ServiceCheck</h1>
+          <h1 className='text-3xl font-bold'>Karen.ai</h1>
           <p className='text-gray-500 mb-0'>
             Test and evaluate your customer service with AI-powered calls
           </p>

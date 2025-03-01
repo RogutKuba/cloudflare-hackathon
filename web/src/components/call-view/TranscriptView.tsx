@@ -54,8 +54,8 @@ export function TranscriptView() {
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
-              sender={message.sender}
-              content={message.content}
+              sender={message.role === 'assistant' ? 'AI' : 'CS'}
+              content={message.message}
             />
           ))}
         </div>

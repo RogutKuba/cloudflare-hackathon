@@ -10,15 +10,21 @@ import {
 } from './workflow/scrape.workflow';
 import { getDbClient } from './db';
 import { BrowserWorker } from '@cloudflare/puppeteer';
+import { Db } from '@datastax/astra-db-ts';
 
 export type AppContext = {
   Bindings: {
     DATABASE_URL: string;
     SCRAPE_WORKFLOW: Workflow<ScrapeWorkflowParams>;
     CRAWLER_BROWSER: BrowserWorker;
+
+    // astra db
+    ASTRA_DB_API_ENDPOINT: string;
+    ASTRA_DB_APPLICATION_TOKEN: string;
   };
   Variables: {
     db: PostgresJsDatabase;
+    astraDb: Db;
   };
 };
 

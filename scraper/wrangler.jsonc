@@ -15,7 +15,9 @@
     "port": 8080
   },
   "vars": {
-    "DATABASE_URL": "postgresql://postgres.aamhimdbvptezvpdhqrt:6YFAx7wB0Rde0sS5@aws-0-us-west-1.pooler.supabase.com:6543/postgres"
+    "DATABASE_URL": "postgresql://postgres.aamhimdbvptezvpdhqrt:6YFAx7wB0Rde0sS5@aws-0-us-west-1.pooler.supabase.com:6543/postgres",
+    "ASTRA_DB_API_ENDPOINT": "https://d2d35526-be18-4956-ae9e-2d43e625673b-us-east-2.apps.astra.datastax.com",
+    "ASTRA_DB_APPLICATION_TOKEN": "AstraCS:BUOpiZXejfqAhkQXydqcDLNL:df1eef1d1b513d6c672c59c0db89c3721f76f80dc0f4ec4e3f30bf1c8ecda4a5"
   },
   "workflows": [
     {

@@ -8,6 +8,7 @@
 	},
 	"dependencies": {
 		"@cloudflare/puppeteer": "^0.0.14",
+		"@datastax/astra-db-ts": "^1.5.0",
 		"drizzle-orm": "^0.40.0",
 		"hono": "^4.7.2",
 		"postgres": "^3.4.5",

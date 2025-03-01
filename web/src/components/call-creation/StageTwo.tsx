@@ -17,8 +17,12 @@ import { DialogDescription } from '@/components/ui/dialog';
 import { DialogTitle } from '@/components/ui/dialog';
 import { DialogHeader } from '@/components/ui/dialog';
 
-export const StageTwo = (props: { callId: string; onSubmit: () => void }) => {
-  const { callId, onSubmit } = props;
+export const StageTwo = (props: {
+  callId: string;
+  onSubmit: () => void;
+  loading: boolean;
+}) => {
+  const { callId, onSubmit, loading } = props;
   const { pages, isLoading } = useCrawledPages({ callId: callId });
 
   // Sort pages: queued first, then others (completed at bottom)
@@ -79,7 +83,12 @@ export const StageTwo = (props: { callId: string; onSubmit: () => void }) => {
         </div>
 
         <div className='flex justify-end'>
-          <Button onClick={onSubmit}>Next</Button>
+          <Button onClick={onSubmit} disabled={loading}>
+            {loading ? (
+              <RiLoader2Fill className='w-3 h-3 mr-1 animate-spin' />
+            ) : null}
+            Next
+          </Button>
         </div>
       </div>
     </>

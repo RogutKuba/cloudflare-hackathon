@@ -5,7 +5,7 @@ import {
 } from 'cloudflare:workers';
 // import { scrapePages } from '../scraper';
 import { AppContext } from '..';
-import { getDbClientFromEnv } from '../db';
+import { getAstraDbClient, getDbClientFromEnv } from '../db';
 import { and, eq } from 'drizzle-orm';
 import { PageEntity, pagesTable } from '../schema/page.db';
 import { callTable } from '../schema/call.db';
@@ -26,6 +26,18 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
     const { callId } = event.payload;
     console.log(`[${callId}] Starting ScrapeWorkflow`);
 
+    // Check how many pages have already been scraped for this call
+    const checkScrapedPages = await step.do('check-scraped-pages', async () => {
+      const db = getDbClientFromEnv(this.env);
+      const scrapedPages = await db
+        .select()
+        .from(pagesTable)
+        .where(
+          and(eq(pagesTable.callId, callId), eq(pagesTable.status, 'completed'))
+        );
+      return scrapedPages.length;
+    });
+
     // Initialize scraping process
     const getPagesToScrape = await step.do('get-pages-to-scrape', async () => {
       const db = getDbClientFromEnv(this.env);
@@ -42,6 +54,25 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
       console.log(`[${callId}] Found ${pages.length} pages to scrape`);
       return pages;
     });
+
+    // Check if we've reached the 10-page limit
+    const pagesRemaining = 10 - checkScrapedPages;
+
+    if (pagesRemaining <= 0) {
+      console.log(
+        `[${callId}] Reached maximum of 10 pages, completing workflow`
+      );
+      await step.do('update-call-status', async () => {
+        const db = getDbClientFromEnv(this.env);
+        // update call status to completed
+        await db
+          .update(callTable)
+          .set({ status: 'completed' })
+          .where(eq(callTable.id, callId));
+        console.log(`[${callId}] Call status updated to 'completed'`);
+      });
+      return { status: 'completed', callId, reason: 'max-pages-reached' };
+    }
 
     if (getPagesToScrape.length === 0) {
       console.log(
@@ -60,9 +91,15 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
       return { status: 'completed', callId };
     } else {
       console.log(
-        `[${callId}] Beginning to process ${getPagesToScrape.length} pages`
+        `[${callId}] Beginning to process ${Math.min(
+          getPagesToScrape.length,
+          pagesRemaining
+        )} pages`
       );
-      for (const page of getPagesToScrape) {
+      // Only process up to the remaining page limit
+      const pagesToProcess = getPagesToScrape.slice(0, pagesRemaining);
+
+      for (const page of pagesToProcess) {
         await step.do(`scrape-page-${page.id}`, async () => {
           console.log(`[${callId}] Processing page ${page.id}: ${page.url}`);
           const db = getDbClientFromEnv(this.env);
@@ -108,17 +145,19 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
               `[${callId}] Found ${nextUrls.length} new URLs to queue`
             );
 
-            const newPagesToScrape: PageEntity[] = nextUrls.map((url) => ({
-              id: crypto.randomUUID(),
-              url,
-              callId,
-              status: 'queued',
-              createdAt: new Date(),
-              title: null,
-              content: null,
-            }));
+            const newPagesToScrape: PageEntity[] = nextUrls
+              .map((url) => ({
+                id: crypto.randomUUID(),
+                url,
+                callId,
+                status: 'queued',
+                createdAt: new Date(),
+                title: null,
+                content: null,
+              }))
+              .slice(0, 5);
 
-            // insert new pages to scrape
+            // insert new pages to scrape only if theres less than 20 pages total
             if (newPagesToScrape.length > 0) {
               console.log(
                 `[${callId}] Inserting ${newPagesToScrape.length} new pages to scrape`
@@ -139,15 +178,35 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
         });
       }
       console.log(
-        `[${callId}] Completed processing batch of ${getPagesToScrape.length} pages`
+        `[${callId}] Completed processing batch of ${pagesToProcess.length} pages`
       );
 
-      // launch same workflow again and keep running until all pages are scraped
-      await this.env.SCRAPE_WORKFLOW.create({
-        params: {
-          callId,
-        },
-      });
+      // Only continue if we haven't reached the limit
+      if (
+        checkScrapedPages + pagesToProcess.length < 10 &&
+        getPagesToScrape.length > 0
+      ) {
+        // launch same workflow again and keep running until all pages are scraped
+        await this.env.SCRAPE_WORKFLOW.create({
+          params: {
+            callId,
+          },
+        });
+      } else {
+        console.log(
+          `[${callId}] Reached or approaching 10-page limit, completing workflow`
+        );
+        await step.do('update-call-status', async () => {
+          const db = getDbClientFromEnv(this.env);
+          // update call status to completed
+          await db
+            .update(callTable)
+            .set({ status: 'completed' })
+            .where(eq(callTable.id, callId));
+          console.log(`[${callId}] Call status updated to 'completed'`);
+        });
+        return { status: 'completed', callId, reason: 'max-pages-reached' };
+      }
     }
   }
 }
