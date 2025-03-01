@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Body
+from pydantic import BaseModel, Field
 import uvicorn
 import json
 import requests
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 import random
 from datetime import datetime, timezone
 from db_operations import update_call_transcript, update_call_ended
+from typing import Optional
 
 # Load environment variables
 load_dotenv()
@@ -19,6 +21,11 @@ active_calls = {}
 # VAPI API credentials
 VAPI_API_KEY = os.getenv("VAPI_API_KEY")
 VAPI_BASE_URL = "https://api.vapi.ai"
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+API_BASE_URL = os.getenv("API_BASE_URL")
+WEBHOOK_URL = API_BASE_URL + "/vapi-webhook"
 
 # List of strange messages to inject
 STRANGE_MESSAGES = [
@@ -27,12 +34,19 @@ STRANGE_MESSAGES = [
     "The government is tracking me through my fillings.",
     "I just remembered I left my other personality in the washing machine.",
     "The moon landing was filmed in my basement.",
-    "I can hear the electricity in the walls talking to me.",
     "My teeth are sending radio signals to Mars.",
     "Yesterday, I saw a squirrel reading a newspaper.",
     "The number 7 has been following me all week.",
     "I'm actually three raccoons in a human costume."
 ]
+
+# Define request model for the new endpoint
+class CallRequest(BaseModel):
+    phone_number: str = Field(..., description="Phone number to call in E.164 format (e.g., +1234567890)")
+    instructions: str = Field(..., description="Instructions for the AI assistant")
+    first_message: Optional[str] = Field("Hello", description="First message the assistant will say")
+    voice_id: Optional[str] = Field("alloy", description="OpenAI voice ID to use")
+    webhook_url: Optional[str] = Field(WEBHOOK_URL, description="Webhook URL to receive call status updates")
 
 def get_call_details(call_id):
     """Get call details from VAPI API to extract control URL"""
@@ -246,6 +260,112 @@ async def vapi_webhook(request: Request):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/make-call")
+async def make_call(request: CallRequest):
+    """
+    Make an outbound phone call with custom instructions
+    
+    Args:
+        request: CallRequest object containing phone number and instructions
+        
+    Returns:
+        dict: Response with call details
+    """
+    try:
+        # Ensure phone number is in E.164 format
+        phone_number = request.phone_number
+        if not phone_number.startswith('+'):
+            phone_number = '+' + phone_number
+            
+        # Configure the assistant
+        assistant_config = {
+            "firstMessage": request.first_message,
+            "voice": {
+                "provider": "openai",
+                "voiceId": request.voice_id
+            },
+            "model": {
+                "provider": "openai",
+                "model": "gpt-4o",
+                "systemPrompt": request.instructions
+            }
+        }
+        
+        # Set webhook URL if provided, otherwise use the default
+        webhook_url = request.webhook_url or os.getenv("API_BASE_URL")
+        if webhook_url:
+            if "server" not in assistant_config:
+                assistant_config["server"] = {}
+            assistant_config["server"]["url"] = webhook_url
+        
+        # Create the payload for VAPI API
+        payload = {
+            "type": "outboundPhoneCall",
+            "customer": {
+                "number": phone_number
+            },
+            "phoneNumber": {
+                "twilioPhoneNumber": TWILIO_PHONE_NUMBER,
+                "twilioAccountSid": TWILIO_ACCOUNT_SID,
+                "twilioAuthToken": TWILIO_AUTH_TOKEN
+            },
+            "assistant": assistant_config
+        }
+        
+        # Make the API call to VAPI
+        headers = {
+            "Authorization": f"Bearer {VAPI_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        print(f"Making call to {phone_number} with instructions: {request.instructions}")
+        print(f"Request payload: {json.dumps(payload, indent=2)}")
+        
+        response = requests.post(
+            f"{VAPI_BASE_URL}/call",
+            headers=headers,
+            json=payload
+        )
+        
+        # Check if the call was successful
+        if response.status_code == 201:
+            result = response.json()
+            call_id = result.get("id")
+            
+            print(f"Call initiated successfully with ID: {call_id}")
+            print(f"Response: {json.dumps(result, indent=2)}")
+            
+            # Initialize call tracking
+            if call_id:
+                active_calls[call_id] = {
+                    "active": True,
+                    "message_count": 0,
+                    "transcript": [],
+                    "phone_number": phone_number,
+                    "instructions": request.instructions
+                }
+            
+            return {
+                "success": True,
+                "message": "Call initiated successfully",
+                "call_id": call_id,
+                "details": result
+            }
+        else:
+            error_message = f"Failed to initiate call: {response.status_code} - {response.text}"
+            print(error_message)
+            return {
+                "success": False,
+                "message": error_message
+            }
+            
+    except Exception as e:
+        error_message = f"Error making call: {str(e)}"
+        print(error_message)
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=error_message)
 
 if __name__ == "__main__":
     # Run the FastAPI server
