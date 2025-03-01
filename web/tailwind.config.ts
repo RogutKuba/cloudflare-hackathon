@@ -121,6 +121,6 @@ const config = {
       drawerSlideRightAndFade: 'drawerSlideRightAndFade 150ms ease-in',
     },
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/forms')],
 };
 export default config;

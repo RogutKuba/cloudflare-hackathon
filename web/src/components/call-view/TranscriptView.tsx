@@ -61,7 +61,7 @@ export function TranscriptView({
     <Card className='lg:col-span-1'>
       <CardHeader className='flex flex-row items-center justify-between pb-2'>
         <div>
-          <CardTitle>Live Call</CardTitle>
+          <CardTitle>Call Transcript</CardTitle>
           <p className='text-sm text-muted-foreground'>Target: {callTarget}</p>
         </div>
         <div className='flex items-center gap-2'>
@@ -84,20 +84,6 @@ export function TranscriptView({
       </CardHeader>
 
       <CardContent>
-        <div className='flex justify-end gap-2 mb-4'>
-          <Button
-            variant='primary'
-            className='bg-primary'
-            onClick={onToggleAudio}
-          >
-            <RiVolumeUpLine className='h-4 w-4 mr-1' />{' '}
-            {isListening ? 'Mute' : 'Listen Live'}
-          </Button>
-          <Button variant='secondary' onClick={onEndCall}>
-            <RiPhoneLockLine className='h-4 w-4 mr-1' /> End Call
-          </Button>
-        </div>
-
         {/* Live Transcript - reduced height */}
         <div className='rounded-lg p-4 h-[250px] overflow-y-auto mb-4'>
           {messages.map((message, index) => (

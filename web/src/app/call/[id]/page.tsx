@@ -71,76 +71,6 @@ export default function Home() {
     { description: 'Sighed audibly', timestamp: '02:37' },
   ];
 
-  const recordings = [
-    {
-      id: 1,
-      company: 'TechSupport Inc.',
-      date: 'April 11, 2023',
-      time: '4:31 PM',
-      status: 'hung-up' as const,
-      onPlay: () => console.log('Play recording 1'),
-    },
-    {
-      id: 2,
-      company: 'TechSupport Inc.',
-      date: 'April 12, 2023',
-      time: '4:32 PM',
-      status: 'transferred' as const,
-      onPlay: () => console.log('Play recording 2'),
-    },
-    {
-      id: 3,
-      company: 'TechSupport Inc.',
-      date: 'April 13, 2023',
-      time: '4:33 PM',
-      status: 'completed' as const,
-      onPlay: () => console.log('Play recording 3'),
-    },
-  ];
-
-  const summaries = [
-    {
-      id: 1,
-      company: 'TechSupport Inc.',
-      summary:
-        'AI claimed to have a computer that was "possessed by the ghost of Steve Jobs." Agent initially tried to troubleshoot before realizing it was a prank. Agent became frustrated after 3 minutes and hung up.',
-    },
-    {
-      id: 2,
-      company: 'TechSupport Inc.',
-      summary:
-        'AI reported internet speeds "slower than a turtle walking through peanut butter." Agent remained professional but transferred call to supervisor after AI insisted the problem was caused by "moon phases."',
-    },
-  ];
-
-  const timelineEvents = [
-    {
-      timestamp: '00:12',
-      description: 'Call connected',
-      type: 'success' as const,
-    },
-    {
-      timestamp: '00:45',
-      description: 'Agent asked for order number',
-      type: 'info' as const,
-    },
-    {
-      timestamp: '01:24',
-      description: 'Agent attempted to transfer call',
-      type: 'warning' as const,
-    },
-    {
-      timestamp: '02:37',
-      description: 'Agent sighed audibly',
-      type: 'warning' as const,
-    },
-    {
-      timestamp: '03:15',
-      description: 'Agent offered troubleshooting steps',
-      type: 'info' as const,
-    },
-  ];
-
   const handleToggleAudio = () => {
     setIsListening(!isListening);
   };
@@ -177,8 +107,12 @@ export default function Home() {
   return (
     <div className='bg-background text-foreground min-h-screen p-6'>
       <header className='mb-6'>
-        <h1 className='text-3xl font-bold'>🤖 PrankAI Call Dashboard</h1>
-        <p>Real-time monitoring of AI customer service prank calls</p>
+        <div>
+          <h1 className='text-3xl font-bold'>ServiceCheck</h1>
+          <p className='text-gray-500 mb-0'>
+            Test and evaluate your customer service with AI-powered calls
+          </p>
+        </div>
       </header>
 
       <div className='grid grid-cols-3 gap-6'>
@@ -202,7 +136,7 @@ export default function Home() {
           <AgentAnalysis metrics={metrics} redFlags={redFlags} />
         </div>
 
-        <CallTimeline events={timelineEvents} />
+        <CallTimeline />
       </div>
     </div>
   );

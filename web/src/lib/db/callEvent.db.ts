@@ -5,7 +5,8 @@ export const callEventTable = pgTable('call_events', {
   call_id: text('call_id').notNull(),
   timestamp: timestamp('timestamp').notNull(),
   epoch: integer('epoch').notNull(),
-  event_type: text('event_type').notNull(),
+  timeIntoCall: integer('time_into_call').notNull(),
+  type: text('type').notNull(),
   description: text('description').notNull(),
 });
 
