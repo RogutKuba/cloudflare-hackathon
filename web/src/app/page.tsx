@@ -88,7 +88,8 @@ export default function Home() {
                             : 'default'
                         }
                       >
-                        {call.status}
+                        {call.status.charAt(0).toUpperCase() +
+                          call.status.slice(1)}
                       </Badge>
                     </TableCell>
                   </TableRow>

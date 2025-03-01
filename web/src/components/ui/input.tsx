@@ -16,13 +16,13 @@ const inputStyles = tv({
     // base
     'relative block w-full appearance-none rounded-md border px-2.5 py-1.5 shadow-sm outline-none transition sm:text-sm',
     // border color
-    'border-stone-300 dark:border-slate-800',
+    'border-stone-300 dark:border-stone-800',
     // text color
-    'text-stone-900 dark:text-slate-50',
+    'text-stone-900 dark:text-stone-50',
     // placeholder color
     'placeholder-stone-400 dark:placeholder-stone-500',
     // background color
-    'bg-white dark:bg-stone-800',
+    'bg-white dark:bg-stone-950',
     // disabled
     'disabled:border-stone-300 disabled:bg-stone-100 disabled:text-stone-400',
     'disabled:dark:border-stone-700 disabled:dark:bg-stone-800 disabled:dark:text-stone-500',

@@ -16,12 +16,20 @@ export async function POST(request: NextRequest) {
     // Validate the request body
     // Add your validation logic here based on your schema requirements
 
+    console.log('body', body);
+
     // Insert the new call into the database
     const newCall = await db
       .insert(callTable)
       .values(body)
       .returning()
       .then(takeUniqueOrThrow);
+
+    // start scraping workflow
+    await fetch(`${process.env.SCRAPER_URL}/${newCall.id}/scrape`, {
+      method: 'POST',
+      body: JSON.stringify({ url: newCall.website }),
+    });
 
     return NextResponse.json(newCall, { status: 201 });
   } catch (error) {

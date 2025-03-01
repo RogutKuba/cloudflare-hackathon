@@ -1,8 +1,8 @@
 import { Context } from 'hono';
-import { AppConext } from '.';
+import { AppContext } from '.';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
-export const getDbClient = (ctx: Context<AppConext>) => {
+export const getDbClient = (ctx: Context<AppContext>) => {
   const local = ctx.get('db');
 
   if (local) {
@@ -13,4 +13,9 @@ export const getDbClient = (ctx: Context<AppConext>) => {
   const db = drizzle(client);
   ctx.set('db', db);
   return db;
+};
+
+export const getDbClientFromEnv = (env: AppContext['Bindings']) => {
+  const client = postgres(env.DATABASE_URL, { prepare: false });
+  return drizzle(client);
 };

@@ -1,5 +1,5 @@
 const config = {
-  // darkMode: ['class'],
+  darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -99,26 +99,28 @@ const config = {
           to: { opacity: '0', transform: 'translateX(100%)' },
         },
       },
-    },
-    animation: {
-      hide: 'hide 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      slideDownAndFade: 'slideDownAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      slideLeftAndFade: 'slideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      slideUpAndFade: 'slideUpAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      slideRightAndFade:
-        'slideRightAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      // Accordion
-      accordionOpen: 'accordionOpen 150ms cubic-bezier(0.87, 0, 0.13, 1)',
-      accordionClose: 'accordionClose 150ms cubic-bezier(0.87, 0, 0.13, 1)',
-      // Dialog
-      dialogOverlayShow:
-        'dialogOverlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      dialogContentShow:
-        'dialogContentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      // Drawer
-      drawerSlideLeftAndFade:
-        'drawerSlideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
-      drawerSlideRightAndFade: 'drawerSlideRightAndFade 150ms ease-in',
+      animation: {
+        hide: 'hide 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideDownAndFade:
+          'slideDownAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideLeftAndFade:
+          'slideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideUpAndFade: 'slideUpAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        slideRightAndFade:
+          'slideRightAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        // Accordion
+        accordionOpen: 'accordionOpen 150ms cubic-bezier(0.87, 0, 0.13, 1)',
+        accordionClose: 'accordionClose 150ms cubic-bezier(0.87, 0, 0.13, 1)',
+        // Dialog
+        dialogOverlayShow:
+          'dialogOverlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        dialogContentShow:
+          'dialogContentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        // Drawer
+        drawerSlideLeftAndFade:
+          'drawerSlideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+        drawerSlideRightAndFade: 'drawerSlideRightAndFade 150ms ease-in',
+      },
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/forms')],

@@ -7,8 +7,6 @@ import React from 'react';
 export function AgentAnalysis() {
   const { scores, isLoading } = useCallScores();
 
-  console.log(scores);
-
   // Format the data for the chart if scores exist
   const chartData = React.useMemo(() => {
     if (!scores || scores.length === 0) return [];

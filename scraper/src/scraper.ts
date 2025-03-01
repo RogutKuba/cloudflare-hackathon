@@ -1,159 +1,98 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { pagesTable, PageEntity } from './schema';
+import { pagesTable } from './schema/page.db';
 import { eq } from 'drizzle-orm';
-import { JSDOM } from 'jsdom';
+import { getDbClientFromEnv } from './db';
+import { AppContext } from '.';
+import puppeteer, { Browser } from '@cloudflare/puppeteer';
 
-export async function scrapePages(
-  startUrl: string,
-  maxPages: number,
-  callId: string,
-  databaseUrl: string
-): Promise<void> {
-  const client = postgres(databaseUrl);
-  const db = drizzle(client);
+export async function scrapePages(params: {
+  id: string;
+  url: string;
+  callId: string;
+  env: AppContext['Bindings'];
+}): Promise<{
+  page: {
+    url: string;
+    title: string;
+    content: string;
+  };
+  nextUrls: string[];
+}> {
+  const { id, url, callId, env } = params;
+  const db = getDbClientFromEnv(env);
+  let browser = null;
 
   try {
-    const visited = new Set<string>();
-    const queue: { url: string; parentUrl?: string }[] = [{ url: startUrl }];
+    // Launch browser using Puppeteer
+    browser = await puppeteer.launch(env.CRAWLER_BROWSER);
 
-    while (queue.length > 0 && visited.size < maxPages) {
-      const { url, parentUrl } = queue.shift()!;
+    // Create a new page
+    const page = await browser.newPage();
 
-      // Skip if already visited
-      if (visited.has(url)) continue;
-      visited.add(url);
+    // Set user agent
+    await page.setUserAgent('Mozilla/5.0 (compatible; WebScraper/1.0)');
 
-      // Update status to in_progress
-      await db
-        .insert(pagesTable)
-        .values({
-          callId,
-          url,
-          parentUrl,
-          status: 'in_progress',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: [pagesTable.callId, pagesTable.url],
-          set: {
-            status: 'in_progress',
-            updatedAt: new Date(),
-          },
-        });
+    // Navigate to the URL and wait for the page to load
+    await page.goto(url, {
+      waitUntil: 'load',
+    });
 
-      try {
-        // Fetch the page
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; WebScraper/1.0)',
-          },
-        });
+    // Extract title and content
+    const title = await page.title();
+    const content = await page.evaluate(() => {
+      return document.body.innerText.trim();
+    });
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch ${url}: ${response.status} ${response.statusText}`
-          );
-        }
+    // Find links to add to the queue
+    const nextUrls = await page.evaluate((baseUrl) => {
+      const links = Array.from(document.querySelectorAll('a[href]'));
+      const uniqueUrls = new Set<string>();
 
-        const html = await response.text();
-        const dom = new JSDOM(html);
-        const document = dom.window.document;
+      links.forEach((link) => {
+        try {
+          const href = link.getAttribute('href');
+          if (!href) return;
 
-        // Extract title and content
-        const title = document.querySelector('title')?.textContent || '';
-        const content =
-          document.querySelector('body')?.textContent?.trim() || '';
+          // Resolve relative URLs
+          const resolvedUrl = new URL(href, baseUrl).toString();
 
-        // Extract metadata
-        const metadata = {
-          description:
-            document
-              .querySelector('meta[name="description"]')
-              ?.getAttribute('content') || '',
-          keywords:
-            document
-              .querySelector('meta[name="keywords"]')
-              ?.getAttribute('content') || '',
-          ogTitle:
-            document
-              .querySelector('meta[property="og:title"]')
-              ?.getAttribute('content') || '',
-          ogDescription:
-            document
-              .querySelector('meta[property="og:description"]')
-              ?.getAttribute('content') || '',
-        };
+          // Only include links to the same domain
+          const urlObj = new URL(baseUrl);
+          const resolvedUrlObj = new URL(resolvedUrl);
 
-        // Update the database with the scraped content
-        await db
-          .update(pagesTable)
-          .set({
-            status: 'completed',
-            title,
-            content,
-            metadata,
-            updatedAt: new Date(),
-          })
-          .where(eq(pagesTable.url, url));
-
-        // Find links to add to the queue
-        if (visited.size < maxPages) {
-          const links = document.querySelectorAll('a[href]');
-          for (const link of links) {
-            try {
-              const href = link.getAttribute('href');
-              if (!href) continue;
-
-              // Resolve relative URLs
-              const resolvedUrl = new URL(href, url).toString();
-
-              // Only follow links to the same domain
-              const urlObj = new URL(url);
-              const resolvedUrlObj = new URL(resolvedUrl);
-
-              if (
-                resolvedUrlObj.hostname === urlObj.hostname &&
-                !visited.has(resolvedUrl) &&
-                !queue.some((item) => item.url === resolvedUrl)
-              ) {
-                queue.push({ url: resolvedUrl, parentUrl: url });
-
-                // Add to database as queued
-                await db
-                  .insert(scrapedPages)
-                  .values({
-                    callId,
-                    url: resolvedUrl,
-                    parentUrl: url,
-                    status: 'queued',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                  })
-                  .onConflictDoNothing();
-              }
-            } catch (error) {
-              // Skip invalid URLs
-              console.error('Error processing link:', error);
-            }
+          if (resolvedUrlObj.hostname === urlObj.hostname) {
+            uniqueUrls.add(resolvedUrl);
           }
+        } catch (error) {
+          // Skip invalid URLs
+          console.error('Error processing link:', error);
         }
-      } catch (error) {
-        console.error(`Error scraping ${url}:`, error);
+      });
 
-        // Update the database with the error
-        await db
-          .update(pagesTable)
-          .set({
-            status: 'failed',
-            error: error instanceof Error ? error.message : String(error),
-            updatedAt: new Date(),
-          })
-          .where(eq(pagesTable.url, url));
-      }
-    }
+      return Array.from(uniqueUrls);
+    }, url);
+
+    return {
+      page: {
+        url,
+        title,
+        content,
+      },
+      nextUrls,
+    };
+  } catch (error) {
+    console.error(`Error scraping ${url}:`, error);
+
+    await db
+      .update(pagesTable)
+      .set({
+        status: 'failed',
+      })
+      .where(eq(pagesTable.id, id));
+
+    throw error;
   } finally {
-    await client.end();
+    if (browser) {
+      await browser.close();
+    }
   }
 }

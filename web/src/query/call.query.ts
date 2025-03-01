@@ -48,7 +48,7 @@ export const useCreateCall = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (call: Omit<CallEntity, 'id' | 'createdAt'>) => {
+    mutationFn: async (call: CallEntity) => {
       const response = await fetch('/api/calls', {
         method: 'POST',
         body: JSON.stringify(call),

@@ -1,23 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@plugin 'tailwindcss-animate';
+
 
 @layer base {
   :root {
-    --background: 0 0% 11%;
-    --foreground: 23 100% 96%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
     --popover: 222.2 47.4% 11.2%;
     --popover-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --card: 222.2 47.4% 11.2%;
-    --card-foreground: 210 40% 98%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 3.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
     --ring: 217.2 32.6% 17.5%;
     --lightgreen: 120 60% 70%;
     --darkgreen: 120 60% 40%;
@@ -32,9 +34,5 @@
   body {
     @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
   }
-  
-  
-  th:first-child {
-    padding-left: 0 !important;
-  }
+
 }

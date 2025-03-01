@@ -6,14 +6,25 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "scraper",
   "main": "src/index.ts",
-  "compatibility_date": "2023-12-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2024-09-23",
   "observability": {
     "enabled": true
   },
-  "vars": {
-    "DATABASE_URL": "YOUR_POSTGRES_CONNECTION_STRING"
+  "dev": {
+    "port": 8080
   },
+  "vars": {
+    "DATABASE_URL": "postgresql://postgres.aamhimdbvptezvpdhqrt:6YFAx7wB0Rde0sS5@aws-0-us-west-1.pooler.supabase.com:6543/postgres"
+  },
+  "workflows": [
+    {
+      "name": "scrape-workflow",
+      "binding": "SCRAPE_WORKFLOW",
+      "class_name": "ScrapeWorkflow"
+    }
+  ],
   "browser": {
-    "binding": "CRAWLER"
+    "binding": "CRAWLER_BROWSER"
   }
 }
