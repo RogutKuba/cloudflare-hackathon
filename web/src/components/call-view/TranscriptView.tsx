@@ -2,53 +2,12 @@
 
 import { ChatMessage } from '@/components/call-view/ChatMessage';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import {
-  RiVolumeUpLine,
-  RiPhoneLockLine,
-  RiPlayFill,
-  RiPauseFill,
-} from '@remixicon/react';
+import { useCall } from '@/query/call.query';
 
-export interface Message {
-  sender: 'AI' | 'CS';
-  content: string;
-  timestamp?: string;
-}
+export function TranscriptView() {
+  const { call, isLoading } = useCall();
 
-interface TranscriptViewProps {
-  callTarget: string;
-  callStatus: 'connected' | 'ended' | 'dialing';
-  callDuration: string;
-  messages: Message[];
-  onEndCall: () => void;
-  onToggleAudio: () => void;
-  isListening: boolean;
-  currentTime: number;
-  duration: number;
-  onTimeChange: (time: number) => void;
-  isPlaying: boolean;
-  onPlay: () => void;
-  onPause: () => void;
-}
-
-export function TranscriptView({
-  callTarget,
-  callStatus,
-  callDuration,
-  messages,
-  onEndCall,
-  onToggleAudio,
-  isListening,
-  currentTime,
-  duration,
-  onTimeChange,
-  isPlaying,
-  onPlay,
-  onPause,
-}: TranscriptViewProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -56,6 +15,12 @@ export function TranscriptView({
       .toString()
       .padStart(2, '0')}`;
   };
+
+  const callTarget = call?.target || 'Unknown';
+  const callStatus = call?.status || 'ended';
+  const callDuration = call?.duration ? formatTime(call.duration) : '00:00';
+
+  const messages = call?.transcript || [];
 
   return (
     <Card className='lg:col-span-1'>

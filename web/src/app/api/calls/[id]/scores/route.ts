@@ -15,7 +15,8 @@ export async function GET(
       .select()
       .from(callScoreTable)
       .where(eq(callScoreTable.call_id, callId))
-      .orderBy(desc(callScoreTable.timestamp));
+      .orderBy(desc(callScoreTable.timestamp))
+      .limit(25);
 
     return NextResponse.json(scores, { status: 200 });
   } catch (error) {

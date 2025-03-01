@@ -4,24 +4,10 @@ import { useCallScores } from '@/query/score.query';
 import { RiBarChartBoxLine } from '@remixicon/react';
 import React from 'react';
 
-interface MetricItem {
-  name: string;
-  value: string | number;
-  percentage: number;
-}
-
-interface RedFlag {
-  description: string;
-  timestamp?: string;
-}
-
-interface AgentAnalysisProps {
-  metrics: MetricItem[];
-  redFlags: RedFlag[];
-}
-
-export function AgentAnalysis({ metrics, redFlags }: AgentAnalysisProps) {
+export function AgentAnalysis() {
   const { scores, isLoading } = useCallScores();
+
+  console.log(scores);
 
   // Format the data for the chart if scores exist
   const chartData = React.useMemo(() => {
