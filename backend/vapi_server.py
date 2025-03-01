@@ -236,7 +236,7 @@ async def vapi_webhook(request: Request):
                         
                         interval_of_weird_messages = int(os.getenv("INTERVAL_OF_WEIRD_MESSAGES"))
                         # Check if it's time to inject a strange message (after every 3rd message)
-                        if current_count % interval_of_weird_messages == 0:
+                        if current_count % int(interval_of_weird_messages) == 0:
                             print(f"Attempting to inject strange message after message #{current_count}")
                             strange_message = random.choice(STRANGE_MESSAGES)
                             success = send_message_to_call(call_id, strange_message)
