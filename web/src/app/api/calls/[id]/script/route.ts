@@ -64,25 +64,26 @@ export async function POST(
           {
             role: 'system',
             content:
-              'Create concise, challenging customer personas with essential details only.',
+              "Create realistic, challenging customer personas that will test a customer service representative's patience and problem-solving skills.",
           },
           {
             role: 'user',
-            content: `Create a brief persona for a difficult customer calling: ${targetDescription}.
+            content: `Create a persona for an annoying or difficult customer calling about: ${targetDescription}.
 
 Here is relevant information from the website that should help:
 ${relevantContent}
 
-Include only:
-- Start with "You are..."
-- 1-2 challenging personality traits
-- Specific request/complaint
-- Any essential information (order details, account info, etc.)
+The persona should:
+- Start with "You are a customer who..."
+- Include 2-3 frustrating personality traits (impatient, condescending, overly talkative, etc.)
+- Have a specific complaint or unreasonable request related to the service
+- Contain realistic but challenging behaviors (interrupting, changing topics, making demands)
+- Include any necessary context like order details or account information
 
-Example: "You are a very forgetful person who is trying to order pizza from dominos. You spend a lot of time thinking and making small talk before getting to the point. Beat around the bush a lot before giving a straightforward answer. You must order a large cheese pizza with banana peppers and onions and jalapenos. Also order some feta cheese garlic bread. 1 bottle of coke too. Address is 1551 Larkin St."`,
+Example: "You are a customer who is very forgetful and is trying to order pizza from dominos. You spend a lot of time thinking and making small talk before getting to the point. Beat around the bush a lot before giving a straightforward answer. You must order a large cheese pizza with banana peppers and onions and jalapenos. Also order some feta cheese garlic bread. 1 bottle of coke too. Address is 1551 Larkin St."`,
           },
         ],
-        max_tokens: 150,
+        max_tokens: 300, // Increased token limit for more detailed personas
       });
 
       persona = completion.choices[0]?.message?.content || '';

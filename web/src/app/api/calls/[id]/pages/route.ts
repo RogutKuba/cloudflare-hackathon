@@ -40,8 +40,6 @@ export async function GET(
       ? singleVectorMatch.content.substring(0, 1000) // Limit to 1000 characters
       : '';
 
-    console.log('relevantContent', relevantContent);
-
     return NextResponse.json(pages, { status: 200 });
   } catch (error) {
     console.error('Error fetching pages:', error);
