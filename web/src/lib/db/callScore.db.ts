@@ -1,6 +1,5 @@
 import {
   pgTable,
-  serial,
   text,
   integer,
   timestamp,
@@ -8,7 +7,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 export const callScoreTable = pgTable('call_scores', {
-  id: serial('id').primaryKey(),
+  id: text('id').primaryKey(),
   call_id: text('call_id').notNull(),
   timestamp: timestamp('timestamp').notNull(),
   epoch: integer('epoch').notNull(),

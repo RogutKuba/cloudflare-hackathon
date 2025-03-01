@@ -5,6 +5,8 @@ import { AgentAnalysis } from '@/components/call-view/AgentAnalysis';
 import { CallTimeline } from '@/components/call-view/CallTimeline';
 import { useCall } from '@/query/call.query';
 import Link from 'next/link';
+import { ScraperStatus } from '@/components/call-view/ScraperStatus';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export default function Home() {
   const { call, isLoading, error } = useCall();
@@ -34,9 +36,22 @@ export default function Home() {
 
       <div className='grid grid-cols-3 gap-6'>
         <div className='col-span-2 flex flex-col gap-6'>
-          <TranscriptView />
-
-          <AgentAnalysis />
+          <Tabs defaultValue='transcript'>
+            <TabsList>
+              <TabsTrigger value='transcript'>Transcript</TabsTrigger>
+              <TabsTrigger value='analysis'>Analysis</TabsTrigger>
+              <TabsTrigger value='scraper'>Web Scraper</TabsTrigger>
+            </TabsList>
+            <TabsContent value='transcript'>
+              <TranscriptView />
+            </TabsContent>
+            <TabsContent value='analysis'>
+              <AgentAnalysis />
+            </TabsContent>
+            <TabsContent value='scraper'>
+              <ScraperStatus callId={call.id} />
+            </TabsContent>
+          </Tabs>
         </div>
 
         <CallTimeline />

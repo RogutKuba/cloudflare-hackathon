@@ -1,7 +1,7 @@
-import { pgTable, serial, text, integer, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp } from 'drizzle-orm/pg-core';
 
 export const callEventTable = pgTable('call_events', {
-  id: serial('id').primaryKey(),
+  id: text('id').primaryKey(),
   call_id: text('call_id').notNull(),
   timestamp: timestamp('timestamp').notNull(),
   epoch: integer('epoch').notNull(),

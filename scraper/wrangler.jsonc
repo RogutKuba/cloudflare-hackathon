@@ -1,0 +1,19 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "scraper",
+  "main": "src/index.ts",
+  "compatibility_date": "2023-12-01",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "DATABASE_URL": "YOUR_POSTGRES_CONNECTION_STRING"
+  },
+  "browser": {
+    "binding": "CRAWLER"
+  }
+}
