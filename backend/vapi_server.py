@@ -5,6 +5,8 @@ import requests
 import os
 from dotenv import load_dotenv
 import random
+from datetime import datetime, timezone
+from db_operations import update_call_transcript, update_call_ended
 
 # Load environment variables
 load_dotenv()
@@ -115,9 +117,6 @@ async def vapi_webhook(request: Request):
         # Get the JSON payload from the request
         payload = await request.json()
         
-        # Print the payload for debugging
-        # print(f"payload: {json.dumps(payload, indent=2)}")
-        
         # Extract the message object which contains the actual data
         message_obj = payload.get("message", {})
         
@@ -135,7 +134,8 @@ async def vapi_webhook(request: Request):
         if call_id and call_id not in active_calls:
             active_calls[call_id] = {
                 "active": True,
-                "message_count": 0
+                "message_count": 0,
+                "transcript": []  # Initialize empty transcript
             }
             
             # Get call details to extract control URL
@@ -148,6 +148,7 @@ async def vapi_webhook(request: Request):
             print(f"📞 CALL STARTED: Call {call_id} has started")
             active_calls[call_id]["active"] = True
             active_calls[call_id]["message_count"] = 0
+            active_calls[call_id]["transcript"] = []  # Reset transcript
             
             # If we don't have a control URL yet, get it now
             if "control_url" not in active_calls[call_id]:
@@ -159,11 +160,34 @@ async def vapi_webhook(request: Request):
             print(f"📞 CALL ENDED: Call {call_id} has ended")
             if call_id in active_calls:
                 active_calls[call_id]["active"] = False
+                
+                # Update database with final transcript and ended status
+                if "transcript" in active_calls[call_id]:
+                    # First update transcript
+                    update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
+                    
+                    # Then update status to ended
+                    update_call_ended(call_id)
         
         # Handle user messages
         elif event_type == "transcription":
             user_message = message_obj.get("text", "")
             print(f"👤 USER: {user_message}")
+            
+            # Add to transcript
+            if call_id in active_calls:
+                if "transcript" not in active_calls[call_id]:
+                    active_calls[call_id]["transcript"] = []
+                
+                # Add the user message to the transcript
+                active_calls[call_id]["transcript"].append({
+                    "role": "user",
+                    "message": user_message,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                })
+                
+                # Update transcript in database
+                update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
         
         # Handle conversation updates (when assistant speaks)
         elif event_type == "conversation-update":
@@ -175,6 +199,20 @@ async def vapi_webhook(request: Request):
                 if last_message.get("role") == "bot":
                     assistant_message = last_message.get("message", "")
                     print(f"🤖 ASSISTANT: {assistant_message}")
+                    
+                    # Add to transcript
+                    if call_id in active_calls:
+                        if "transcript" not in active_calls[call_id]:
+                            active_calls[call_id]["transcript"] = []
+                        
+                        active_calls[call_id]["transcript"].append({
+                            "role": "assistant",
+                            "message": assistant_message,
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        })
+                        
+                        # Update transcript in database
+                        update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
                     
                     # Increment message count for this call
                     if call_id in active_calls and active_calls[call_id].get("active", False):
@@ -188,6 +226,17 @@ async def vapi_webhook(request: Request):
                             strange_message = random.choice(STRANGE_MESSAGES)
                             success = send_message_to_call(call_id, strange_message)
                             print(f"Message injection success: {success}")
+                            
+                            # Add injected message to transcript
+                            if success:
+                                active_calls[call_id]["transcript"].append({
+                                    "role": "system_injection",
+                                    "message": strange_message,
+                                    "timestamp": datetime.now(timezone.utc).isoformat()
+                                })
+                                
+                                # Update transcript in database with the injected message
+                                update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
         
         # Return a success response
         return {"status": "success", "message": f"Processed {event_type} event"}
