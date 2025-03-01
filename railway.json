@@ -1,8 +1,8 @@
 {
     "build": {
-      "base": "backend",
-      "watch": ["backend"],
-      "deploy": "cd backend && pip install -r requirements.txt && python vapi_server.py"
-    }
+      "builder": "NIXPACKS",
+      "root": "backend"
+    },
+    "start": "python app.py"
   }
   
