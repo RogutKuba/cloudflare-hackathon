@@ -41,6 +41,7 @@ export const CreateCallDialog = ({
         target: values.target,
         transcript: [],
         duration: 0,
+        phoneNumber: values.phoneNumber,
       });
 
       // Generate script points based on personality
@@ -77,6 +78,18 @@ export const CreateCallDialog = ({
     try {
       // Update the call with the weird phrase
       // This would be an API call to update the call
+
+      const response = await fetch(`/api/calls/${currentCall?.id}/start`, {
+        method: 'POST',
+        body: JSON.stringify({
+          script: persona,
+          phoneNumber: currentCall?.phoneNumber,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start call');
+      }
 
       // Navigate to the call page
       setOpen(false);

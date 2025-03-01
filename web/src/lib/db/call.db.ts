@@ -29,6 +29,7 @@ export const callTable = pgTable('calls', {
     >()
     .notNull(),
   website: text('website').notNull(),
+  phoneNumber: text('phone_number').notNull(),
 });
 
 export type CallEntity = typeof callTable.$inferSelect;

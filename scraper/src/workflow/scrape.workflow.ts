@@ -41,7 +41,9 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
     // Initialize scraping process
     const getPagesToScrape = await step.do('get-pages-to-scrape', async () => {
       const db = getDbClientFromEnv(this.env);
-      console.log(`[${callId}] Querying database for pages to scrape`);
+      console.log(
+        `[${callId}] Querying database for pages to scrape for call ${callId}`
+      );
 
       const pages = await db
         .select()
@@ -127,6 +129,32 @@ export class ScrapeWorkflow extends WorkflowEntrypoint<
                 title: data.page.title,
               })
               .where(eq(pagesTable.id, page.id));
+
+            // add embedded document to vector database
+            const astraDb = getAstraDbClient(this.env);
+
+            // chunk content into max 500 character segments
+            const content = data.page.content;
+            const chunkSize = 500;
+            const chunks = [];
+
+            for (let i = 0; i < content.length; i += chunkSize) {
+              chunks.push(content.substring(i, i + chunkSize));
+            }
+
+            // insert each chunk as a separate document
+            for (let i = 0; i < chunks.length; i++) {
+              await astraDb.collection('pages').insertOne({
+                _id: `${page.id}-chunk-${i}`,
+                content: chunks[i],
+                title: data.page.title,
+                callId: callId,
+                originalPageId: page.id,
+                chunkIndex: i,
+                totalChunks: chunks.length,
+                $vectorize: chunks[i],
+              });
+            }
 
             // add next urls only if they dont currently exist
             console.log(`[${callId}] Checking for existing URLs in database`);
