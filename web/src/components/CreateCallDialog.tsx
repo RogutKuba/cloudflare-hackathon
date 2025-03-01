@@ -91,9 +91,13 @@ export const CreateCallDialog = ({
         throw new Error('Failed to start call');
       }
 
+      const data = (await response.json()) as {
+        call_id: string;
+      };
+
       // Navigate to the call page
       setOpen(false);
-      router.push(`/call/${currentCall?.id}`);
+      router.push(`/call/${data.call_id}`);
     } catch (error) {
       console.error(error);
     } finally {

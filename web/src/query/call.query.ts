@@ -16,6 +16,7 @@ export const useCall = () => {
 
       return response.json() as Promise<CallEntity>;
     },
+    refetchInterval: 2500,
   });
 
   return {
@@ -36,6 +37,7 @@ export const useCalls = () => {
 
       return response.json() as Promise<CallEntity[]>;
     },
+    refetchInterval: 2500,
   });
 
   return {

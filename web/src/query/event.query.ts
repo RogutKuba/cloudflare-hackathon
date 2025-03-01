@@ -16,6 +16,7 @@ export const useCallEvents = () => {
 
       return response.json() as Promise<CallEventEntity[]>;
     },
+    refetchInterval: 2500,
   });
 
   return {

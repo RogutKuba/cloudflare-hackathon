@@ -44,24 +44,24 @@ export function CallTimeline() {
                     className={`w-3 h-3 rounded-full ${
                       event.type === 'error'
                         ? 'bg-red-500'
-                        : event.type === 'warning'
-                        ? 'bg-amber-500'
-                        : 'bg-green-500'
+                        : event.type === 'success'
+                        ? 'bg-green-500'
+                        : 'bg-amber-500'
                     }`}
                   />
                   <div
                     className={`w-0.5 flex-grow ${
                       event.type === 'error'
                         ? 'bg-red-500'
-                        : event.type === 'warning'
-                        ? 'bg-amber-500'
-                        : 'bg-green-500'
+                        : event.type === 'success'
+                        ? 'bg-green-500'
+                        : 'bg-amber-500'
                     }`}
                   />
                 </div>
                 <div className='ml-6'>
                   <div className='text-xs font-mono text-muted-foreground'>
-                    {formatCallTime(event.timeIntoCall)}
+                    {formatCallTime(Math.abs(event.timeIntoCall))}
                   </div>
                   <div className='text-sm font-medium'>{event.description}</div>
                 </div>

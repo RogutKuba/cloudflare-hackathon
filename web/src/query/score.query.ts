@@ -16,6 +16,7 @@ export const useCallScores = () => {
 
       return response.json() as Promise<CallScoreEntity[]>;
     },
+    refetchInterval: 2500,
   });
 
   return {
