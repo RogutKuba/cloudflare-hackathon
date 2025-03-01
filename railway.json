@@ -1,0 +1,8 @@
+{
+    "build": {
+      "base": "backend",
+      "watch": ["backend"],
+      "deploy": "cd backend && pip install -r requirements.txt && python app.py"
+    }
+  }
+  
