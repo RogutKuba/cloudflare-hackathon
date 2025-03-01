@@ -1,0 +1,21 @@
+# API and HTTP
+fastapi==0.103.1
+uvicorn==0.23.2
+pydantic==2.3.0
+requests==2.31.0
+websockets==11.0.3
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Twilio
+twilio==8.5.0
+
+# Deepgram
+deepgram-sdk==2.11.0
+
+# OpenAI
+openai==0.28.0
+
+# Async support
+asyncio==3.4.3
