@@ -3,6 +3,6 @@
       "builder": "NIXPACKS",
       "root": "backend"
     },
-    "start": "python app.py"
+    "start": "python vapi_server.py"
   }
   
