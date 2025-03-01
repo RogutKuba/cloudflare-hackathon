@@ -141,8 +141,8 @@ async def vapi_webhook(request: Request):
         call_obj = message_obj.get("call", {})
         call_id = call_obj.get("id")
         
-        print(f"event_type: {event_type}")
-        print(f"call_id: {call_id}")
+        #print(f"event_type: {event_type}")
+        #print(f"call_id: {call_id}")
         
         # Initialize call tracking if not exists
         if call_id and call_id not in active_calls:
@@ -184,24 +184,53 @@ async def vapi_webhook(request: Request):
                     update_call_ended(call_id)
         
         # Handle user messages
-        elif event_type == "transcription":
-            user_message = message_obj.get("text", "")
+        elif event_type == "speech-update" or event_type == "user-interrupted":
+            # Extract user message from the message_obj
+            user_message = ""
+            
+            # For speech-update events, the user message is in the artifact.messages array
+            if event_type == "speech-update":
+                artifact = message_obj.get("artifact", {})
+                messages = artifact.get("messages", [])
+                
+                # Look for the most recent user message
+                for msg in reversed(messages):
+                    if msg.get("role") == "user":
+                        user_message = msg.get("message", "")
+                        break
+            else:
+                # For user-interrupted events, the text is directly in the message_obj
+                user_message = message_obj.get("text", "")
+                
             print(f"👤 USER: {user_message}")
             
-            # Add to transcript
+            # Add to transcript (only if it's not a duplicate)
             if call_id in active_calls:
                 if "transcript" not in active_calls[call_id]:
                     active_calls[call_id]["transcript"] = []
                 
-                # Add the user message to the transcript
-                active_calls[call_id]["transcript"].append({
-                    "role": "user",
-                    "message": user_message,
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                })
+                # Check if this is a duplicate of the last user message
+                is_duplicate = False
+                if active_calls[call_id]["transcript"]:
+                    # Find the last user message in the transcript
+                    for msg in reversed(active_calls[call_id]["transcript"]):
+                        if msg.get("role") == "user":
+                            if msg.get("message") == user_message:
+                                is_duplicate = True
+                                print("Skipping duplicate user message")
+                            break  # Stop after finding the last user message
                 
-                # Update transcript in database
-                update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
+                # Only add if not a duplicate and not empty
+                if not is_duplicate and user_message.strip():
+                    # Add the user message to the transcript
+                    active_calls[call_id]["transcript"].append({
+                        "role": "user",
+                        "message": user_message,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    })
+                    
+                    # Update transcript in database
+                    update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
         
         # Handle conversation updates (when assistant speaks)
         elif event_type == "conversation-update":

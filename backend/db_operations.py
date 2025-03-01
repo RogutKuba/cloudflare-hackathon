@@ -76,7 +76,7 @@ def update_call_transcript(call_id, transcript, api_key=None, base_url=None):
                 {"transcript": json.dumps(transcript), "call_id": call_id}
             )
             db.commit()
-            print(f"Updated transcript for call {call_id}")
+            #print(f"Updated transcript for call {call_id}")
         else:
             # Get call details for a new record if API credentials provided
             call_details = None
@@ -258,7 +258,7 @@ def test_db_operations():
             return False
         
         print(f"✅ Transcript updated successfully")
-        print(f"   Updated transcript: {transcript_data}")
+        #print(f"   Updated transcript: {transcript_data}")
         
         # Step 3: Update with assistant response and injected message
         time.sleep(1)

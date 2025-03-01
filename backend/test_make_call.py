@@ -18,8 +18,9 @@ def test_make_call(phone_number=None, instructions=None, first_message=None, voi
         voice_id: Voice ID to use (optional)
     """
     # API endpoint URL - adjust if your server is running on a different host/port
-    API_BASE_URL = os.getenv("API_BASE_URL")
+    API_BASE_URL = 'https://1de6-23-93-127-12.ngrok-free.app' #os.getenv("API_BASE_URL")
     url = API_BASE_URL + "/make-call"
+    print(f"API_BASE_URL: {API_BASE_URL}")
     
     # Use provided values or defaults
     phone_number = phone_number or "+13479695538"  # Replace with your test number
@@ -32,7 +33,7 @@ def test_make_call(phone_number=None, instructions=None, first_message=None, voi
         Your name is Alex from technical support.
     """
     
-    first_message = first_message or "Hello, thank you for calling tech support. My name is Alex. How can I help you today?"
+    first_message = first_message or "Hello is this Dominos?"
     voice_id = voice_id or "nova"
     
     # Prepare the payload
@@ -93,9 +94,13 @@ if __name__ == "__main__":
         # Get optional voice ID
         voice_id = sys.argv[4] if len(sys.argv) > 4 else None
         
-        test_make_call(phone_number, instructions, first_message, voice_id)
+        #test_make_call('3479695538', "You are a very rude person who is trying to order pizza from dominos. You must order a large cheese pizza with banana peppers and \
+        #            onions and jalapenos. Also order some feta cheese garlic bread. 1 bottle of coke too.", first_message, voice_id)
+        test_make_call(phone_number='3479695538', instructions="You are a very forgetful person who is trying to order pizza from dominos. You spend a lot of time thinking and making small talk before getting to the point. Beat around the bush a lot before giving a straightforward answer. You must order a large cheese pizza with banana peppers and \
+                    onions and jalapenos. Also order some feta cheese garlic bread. 1 bottle of coke too.")
     else:
         # No arguments provided, use defaults
         print("No arguments provided. Using default test values.")
         print("Usage: python test_make_call.py [phone_number] [instructions] [first_message] [voice_id]")
-        test_make_call() 
+        test_make_call(phone_number='+13479695538', instructions="You are a very forgetful person who is trying to order pizza from dominos. You spend a lot of time thinking and making small talk before getting to the point. Beat around the bush a lot before giving a straightforward answer. You must order a large cheese pizza with banana peppers and \
+                    onions and jalapenos. Also order some feta cheese garlic bread. 1 bottle of coke too. Address is 1551 Larkin St.") 
