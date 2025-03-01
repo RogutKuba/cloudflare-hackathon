@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException, Body
+from fastapi import FastAPI, Request, HTTPException, Body, BackgroundTasks
 from pydantic import BaseModel, Field
 import uvicorn
 import json
@@ -9,6 +9,7 @@ import random
 from datetime import datetime, timezone
 from db_operations import update_call_transcript, update_call_ended
 from typing import Optional
+from call_analysis import process_transcript
 
 # Load environment variables
 load_dotenv()
@@ -122,11 +123,12 @@ def send_message_to_call(call_id, message):
         return False
 
 @app.post("/vapi-webhook")
-async def vapi_webhook(request: Request):
+async def vapi_webhook(request: Request, background_tasks: BackgroundTasks):
     """
     Webhook endpoint to receive VAPI call status updates and inject messages
     after every 3rd assistant response
     """
+
     try:
         # Get the JSON payload from the request
         payload = await request.json()
@@ -137,12 +139,13 @@ async def vapi_webhook(request: Request):
         # Extract event type from the message object
         event_type = message_obj.get("type")
         
-        # Extract call ID from the call object inside the message
-        call_obj = message_obj.get("call", {})
-        call_id = call_obj.get("id")
-        
-        #print(f"event_type: {event_type}")
-        #print(f"call_id: {call_id}")
+        # Extract call ID from the message object
+        call_temp = message_obj.get("call")
+        call_id = call_temp.get("id")
+        if not call_id:
+            return {"status": "error", "message": "No call_id in payload"}
+            
+        print(f"Received {event_type} event for call {call_id}")
         
         # Initialize call tracking if not exists
         if call_id and call_id not in active_calls:
@@ -231,6 +234,16 @@ async def vapi_webhook(request: Request):
                     
                     # Update transcript in database
                     update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
+                    transcript_length = len(active_calls[call_id]["transcript"])
+                    if transcript_length % 3 == 0:
+                        background_tasks.add_task(
+                            process_transcript,
+                            call_id,
+                            active_calls[call_id]["transcript"],
+                            active_calls[call_id].get("start_time", datetime.now(timezone.utc).isoformat()),
+                            active_calls[call_id].get("message_count", 0)
+                        )
+                    
         
         # Handle conversation updates (when assistant speaks)
         elif event_type == "conversation-update":
@@ -256,6 +269,15 @@ async def vapi_webhook(request: Request):
                         
                         # Update transcript in database
                         update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
+                        transcript_length = len(active_calls[call_id]["transcript"])
+                        if transcript_length % 3 == 0:
+                            background_tasks.add_task(
+                                process_transcript,
+                                call_id,
+                                active_calls[call_id]["transcript"],
+                                active_calls[call_id].get("start_time", datetime.now(timezone.utc).isoformat()),
+                                active_calls[call_id].get("message_count", 0)
+                            )
                     
                     # Increment message count for this call
                     if call_id in active_calls and active_calls[call_id].get("active", False):
@@ -281,8 +303,6 @@ async def vapi_webhook(request: Request):
                                 
                                 # Update transcript in database with the injected message
                                 update_call_transcript(call_id, active_calls[call_id]["transcript"], VAPI_API_KEY, VAPI_BASE_URL)
-        
-        # Return a success response
         return {"status": "success", "message": f"Processed {event_type} event"}
         
     except Exception as e:

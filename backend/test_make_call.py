@@ -18,7 +18,7 @@ def test_make_call(phone_number=None, instructions=None, first_message=None, voi
         voice_id: Voice ID to use (optional)
     """
     # API endpoint URL - adjust if your server is running on a different host/port
-    API_BASE_URL = 'https://1de6-23-93-127-12.ngrok-free.app' #os.getenv("API_BASE_URL")
+    API_BASE_URL = 'https://ef09-104-28-152-181.ngrok-free.app' #os.getenv("API_BASE_URL")
     url = API_BASE_URL + "/make-call"
     print(f"API_BASE_URL: {API_BASE_URL}")
     
