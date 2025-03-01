@@ -9,3 +9,19 @@ if (!connectionString) {
 
 const sql = postgres(connectionString);
 export const db = drizzle(sql);
+
+export const takeUnique = <T>(arr: T[]): T | undefined => {
+  if (arr.length === 0) {
+    return undefined;
+  }
+
+  return arr[0];
+};
+
+export const takeUniqueOrThrow = <T>(arr: T[]): T => {
+  if (arr.length !== 1) {
+    throw new Error('Expected exactly one value, got ' + arr.length);
+  }
+
+  return arr[0];
+};

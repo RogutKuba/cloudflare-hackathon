@@ -10,30 +10,28 @@ import {
   focusRing,
   hasErrorInput,
 } from '@/components/ui/lib/utils';
-import debounceFunc from 'debounce';
-import { toast } from 'sonner';
 
 const inputStyles = tv({
   base: [
     // base
     'relative block w-full appearance-none rounded-md border px-2.5 py-1.5 shadow-sm outline-none transition sm:text-sm',
     // border color
-    'border-gray-300 dark:border-gray-800',
+    'border-stone-300 dark:border-slate-800',
     // text color
-    'text-gray-900 dark:text-gray-50',
+    'text-stone-900 dark:text-slate-50',
     // placeholder color
-    'placeholder-gray-400 dark:placeholder-gray-500',
+    'placeholder-stone-400 dark:placeholder-stone-500',
     // background color
-    'bg-white dark:bg-gray-950',
+    'bg-white dark:bg-stone-800',
     // disabled
-    'disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-400',
-    'disabled:dark:border-gray-700 disabled:dark:bg-gray-800 disabled:dark:text-gray-500',
+    'disabled:border-stone-300 disabled:bg-stone-100 disabled:text-stone-400',
+    'disabled:dark:border-stone-700 disabled:dark:bg-stone-800 disabled:dark:text-stone-500',
     // file
     [
       'file:-my-1.5 file:-ml-2.5 file:h-[36px] file:cursor-pointer file:rounded-l-md file:rounded-r-none file:border-0 file:px-3 file:py-1.5 file:outline-none focus:outline-none disabled:pointer-events-none file:disabled:pointer-events-none',
-      'file:border-solid file:border-gray-300 file:bg-gray-50 file:text-gray-500 file:hover:bg-gray-100 file:dark:border-gray-800 file:dark:bg-gray-950 file:hover:dark:bg-gray-900/20 file:disabled:dark:border-gray-700',
+      'file:border-solid file:border-stone-300 file:bg-stone-50 file:text-stone-500 file:hover:bg-stone-100 file:dark:border-stone-800 file:dark:bg-stone-950 file:hover:dark:bg-stone-900/20 file:disabled:dark:border-stone-700',
       'file:[border-inline-end-width:1px] file:[margin-inline-end:0.75rem]',
-      'file:disabled:bg-gray-100 file:disabled:text-gray-500 file:disabled:dark:bg-gray-800',
+      'file:disabled:bg-stone-100 file:disabled:text-stone-500 file:disabled:dark:bg-stone-800',
     ],
     // focus
     focusInput,
@@ -97,7 +95,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // base
               'pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center',
               // text color
-              'text-gray-400 dark:text-gray-600'
+              'text-stone-400 dark:text-stone-600'
             )}
           >
             <RiSearchLine
@@ -118,9 +116,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 // base
                 'h-fit w-fit rounded-sm outline-none transition-all',
                 // text
-                'text-gray-400  dark:text-gray-600',
+                'text-stone-400  dark:text-stone-600',
                 // hover
-                'hover:text-gray-500 hover:dark:text-gray-500',
+                'hover:text-stone-500 hover:dark:text-stone-500',
                 focusRing
               )}
               type='button'
@@ -144,41 +142,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
-
-type CopyableInputProps = {
-  className?: string;
-  inputClassName?: string;
-  value: string;
-};
-
-const CopyableInput = React.forwardRef<HTMLDivElement, CopyableInputProps>(
-  ({ className, inputClassName, value }: CopyableInputProps, forwardedRef) => {
-    return (
-      <div
-        className={cx('relative w-full cursor-pointer', className)}
-        onClick={() => {
-          try {
-            navigator.clipboard.writeText(value);
-            toast.success('Copied to clipboard');
-          } catch (error: any) {
-            console.error(error.message);
-          }
-        }}
-      >
-        <div
-          ref={forwardedRef}
-          className={cx(
-            inputStyles({ hasError: false, enableStepper: false }),
-            inputClassName
-          )}
-        >
-          {value}
-        </div>
-      </div>
-    );
-  }
-);
-CopyableInput.displayName = 'CopyableInput';
-
-export { Input, inputStyles, CopyableInput, type InputProps };
+export { Input, inputStyles, type InputProps };

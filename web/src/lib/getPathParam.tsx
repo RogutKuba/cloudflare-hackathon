@@ -1,3 +1,6 @@
+import { useParams } from 'next/navigation';
+
 export const useCurrentCallId = () => {
-  return 'test_123';
+  const params = useParams<{ id: string }>();
+  return params.id as string;
 };
