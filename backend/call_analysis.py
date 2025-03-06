@@ -393,7 +393,7 @@ async def process_transcript(call_id, transcript, call_start_time, message_count
         await analyze_user_behavior(call_id, transcript, call_start_time)
         
         # Score the conversation quality every 3 messages
-        if message_count > 0 and message_count-1 % 2 == 0:
+        if message_count > 0 and message_count-1 % 3 == 0:
             print(f"📊 Starting conversation quality scoring (message count: {message_count})")
             await score_conversation_quality(call_id, transcript, call_start_time)
         else:
