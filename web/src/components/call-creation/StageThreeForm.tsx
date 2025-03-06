@@ -25,7 +25,6 @@ import { useRouter } from 'next/navigation';
 // Form schema for stage three
 const stageThreeSchema = z.object({
   script: z.string().min(1, { message: 'Please enter a script' }),
-  weirdPhrase: z.string().min(1, { message: 'Please enter a phrase' }),
 });
 
 type StageThreeValues = z.infer<typeof stageThreeSchema>;
@@ -45,7 +44,6 @@ export const StageThreeForm = ({
     resolver: zodResolver(stageThreeSchema),
     defaultValues: {
       script: baseScript,
-      weirdPhrase: '',
     },
   });
 
@@ -74,19 +72,16 @@ export const StageThreeForm = ({
               name='script'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Script Points</FormLabel>
+                  <FormLabel>Persona</FormLabel>
                   <FormControl>
-                    <Textarea className='resize-none' {...field} />
+                    <Textarea className='min-h-[200px]' {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Script points for the AI to follow
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name='weirdPhrase'
               render={({ field }) => (
@@ -106,7 +101,7 @@ export const StageThreeForm = ({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <DialogFooter className='flex justify-between'>
               <Button type='submit'>Start Call</Button>

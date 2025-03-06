@@ -22,6 +22,7 @@ import {
 } from 'react-day-picker';
 
 import { cx, focusRing } from '@/components/ui/lib/utils';
+import { RefObject } from 'react';
 
 interface NavigationButtonProps
   extends React.HTMLAttributes<HTMLButtonElement> {
@@ -256,7 +257,11 @@ const Calendar = ({
         Day: ({ date, displayMonth }: DayProps) => {
           const buttonRef = React.useRef<HTMLButtonElement>(null);
           const { activeModifiers, buttonProps, divProps, isButton, isHidden } =
-            useDayRender(date, displayMonth, buttonRef);
+            useDayRender(
+              date,
+              displayMonth,
+              buttonRef as RefObject<HTMLButtonElement>
+            );
 
           const { selected, today, disabled, range_middle } = activeModifiers;
 

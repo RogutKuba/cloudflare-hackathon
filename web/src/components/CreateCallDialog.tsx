@@ -70,10 +70,7 @@ export const CreateCallDialog = ({
     }
   };
 
-  const handleStageThreeSubmit = async (values: {
-    script: string;
-    weirdPhrase: string;
-  }) => {
+  const handleStageThreeSubmit = async (values: { script: string }) => {
     setLoading(true);
     try {
       // Update the call with the weird phrase

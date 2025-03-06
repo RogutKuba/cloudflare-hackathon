@@ -74,13 +74,12 @@ Here is relevant information from the website that should help:
 ${relevantContent}
 
 The persona should:
-- Start with "You are a customer who..."
-- Include 2-3 frustrating personality traits (impatient, condescending, overly talkative, etc.)
+- Make sure the persona is rude and annoying
 - Have a specific complaint or unreasonable request related to the service
 - Contain realistic but challenging behaviors (interrupting, changing topics, making demands)
 - Include any necessary context like order details or account information
-
-Example: "You are a customer who is very forgetful and is trying to order pizza from dominos. You spend a lot of time thinking and making small talk before getting to the point. Beat around the bush a lot before giving a straightforward answer. You must order a large cheese pizza with banana peppers and onions and jalapenos. Also order some feta cheese garlic bread. 1 bottle of coke too. Address is 1551 Larkin St."`,
+- Be angry and frustrated
+`,
           },
         ],
         max_tokens: 300, // Increased token limit for more detailed personas
